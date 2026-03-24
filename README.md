@@ -48,7 +48,7 @@ sepm_project/
 │   │   ├── pages/        # Dashboard & Management views
 │   │   ├── services/     # Supabase client initialization
 │   │   └── utils/        # SLA Engine, cn() utility, formatting
-│   └── seedData.js       # Demo data ingestion script
+│   └── scripts/          # Manual seeding and data utility scripts
 ├── supabase/
 │   └── schema.sql        # Database definitions, RLS, and triggers
 └── README.md             # Project documentation
@@ -71,6 +71,13 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```bash
 cd frontend
 npm install
+```
+
+### 4. Database Seeding (Optional)
+If you wish to populate your database with demo Indian university context:
+```bash
+# From the frontend root
+node scripts/seedData.js
 ```
 
 ### 4. Database Initialization
