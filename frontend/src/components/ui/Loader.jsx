@@ -9,9 +9,10 @@ export function Loader({ className, size = "md" }) {
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <Loader2 
-        className={cn("animate-spin text-primary-600", sizeClasses[size], className)} 
+    <div className="flex items-center justify-center p-6">
+      <Loader2
+        className={cn("animate-spin", sizeClasses[size], className)}
+        style={{ color: "#6c63ff" }}
       />
     </div>
   );

@@ -8,136 +8,141 @@ import { Bell, LogOut, Menu, UserCircle, ChevronDown, CheckCircle2 } from "lucid
 export function Topbar({ onMenuClick }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
-  // Profile dropdown state
+
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
-  // Notification dropdown state
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef(null);
-  
+
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       if (!user?.id) return;
-      
       const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(10);
-        
-      if (!error && data) {
-        setNotifications(data);
-      }
+      if (!error && data) setNotifications(data);
     };
-    
-    // Fetch initially
     fetchNotifications();
-    
-    // Optionally we could poll, but the user requested simple logic with no real-time constraint.
-  }, [user, notifOpen]); // Re-fetch whenever they open the dropdown
+  }, [user, notifOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setNotifOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) setProfileOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target)) setNotifOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const markAsRead = async (notifId) => {
-    // Optimistic UI update
     setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, is_read: true } : n));
-    // Database update
-    await supabase.from('notifications').update({ is_read: true }).eq('id', notifId);
+    await supabase.from("notifications").update({ is_read: true }).eq("id", notifId);
   };
 
   const markAllAsRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-    await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
+    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
   };
 
   const hasUnread = notifications.some(n => !n.is_read);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6 lg:px-8">
+    <header
+      className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8"
+      style={{ background: "#e0e5ec", boxShadow: "0 4px 15px #a3b1c6, 0 -2px 8px #ffffff88" }}
+    >
+      {/* Mobile menu button */}
       <div className="flex items-center gap-x-4 lg:hidden">
         <button
           type="button"
           onClick={onMenuClick}
-          className="-m-2.5 p-2.5 text-slate-700 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-600 rounded-sm"
+          className="nm-btn h-10 w-10 flex items-center justify-center rounded-[10px]"
+          style={{ color: "#7c8db5" }}
         >
           <span className="sr-only">Open sidebar</span>
-          <Menu className="h-6 w-6" aria-hidden="true" />
+          <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-x-4 self-stretch lg:gap-x-6">
-        <div className="flex items-center gap-x-4 lg:gap-x-6">
-          
-          {/* Notifications Dropdown */}
+        <div className="flex items-center gap-x-3 lg:gap-x-4">
+
+          {/* Notifications */}
           <div className="relative" ref={notifRef}>
-            <button 
-              type="button" 
-              onClick={() => {
-                setNotifOpen(!notifOpen);
-                setProfileOpen(false);
-              }}
-              className="p-2 text-slate-400 hover:text-slate-600 rounded-sm hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-600 relative"
+            <button
+              type="button"
+              onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
+              className="nm-btn h-10 w-10 flex items-center justify-center rounded-[10px] relative"
+              style={{ color: "#7c8db5" }}
             >
               <span className="sr-only">View notifications</span>
               <Bell className="h-5 w-5" aria-hidden="true" />
               {hasUnread && (
-                <span className="absolute top-2 right-2 flex h-2 w-2 items-center justify-center rounded-full bg-primary-600 ring-2 ring-white"></span>
+                <span
+                  className="absolute top-2 right-2 flex h-2.5 w-2.5 items-center justify-center rounded-full"
+                  style={{ background: "#6c63ff", boxShadow: "0 0 0 2px #e0e5ec" }}
+                />
               )}
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 z-50 mt-2.5 w-80 origin-top-right rounded-sm bg-white shadow-lg ring-1 ring-slate-900/5 focus:outline-none overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+              <div
+                className="absolute right-0 z-50 mt-3 w-80 nm-dropdown"
+                style={{ minWidth: "320px" }}
+              >
+                <div
+                  className="px-4 py-3 flex justify-between items-center"
+                  style={{ borderBottom: "1px solid #cdd5e0" }}
+                >
+                  <h3 className="text-sm font-bold nm-heading">Notifications</h3>
                   {hasUnread && (
-                    <button onClick={markAllAsRead} className="text-xs text-primary-600 hover:text-primary-700 font-medium">Mark all as read</button>
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-xs font-semibold nm-primary hover:opacity-80 transition-opacity"
+                    >
+                      Mark all read
+                    </button>
                   )}
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.length > 0 ? (
-                    <ul className="divide-y divide-slate-100">
+                    <ul>
                       {notifications.map((notif) => (
-                        <li key={notif.id} className={`hover:bg-slate-50 transition-colors ${!notif.is_read ? "bg-primary-50/30" : ""}`}>
-                          <button 
-                            onClick={() => {
-                              markAsRead(notif.id);
-                              setNotifOpen(false);
-                            }}
-                            className="w-full text-left block px-4 py-3 focus:outline-none"
+                        <li
+                          key={notif.id}
+                          style={{
+                            borderBottom: "1px solid #cdd5e0",
+                            background: !notif.is_read ? "#e8ecf3" : "transparent"
+                          }}
+                        >
+                          <button
+                            onClick={() => { markAsRead(notif.id); setNotifOpen(false); }}
+                            className="w-full text-left block px-4 py-3 transition-colors hover:bg-[#dde3ec] focus:outline-none"
                           >
-                            <p className={`text-sm text-slate-800 line-clamp-2 ${!notif.is_read ? 'font-semibold' : 'font-medium'}`}>
+                            <p className={`text-sm nm-text line-clamp-2 ${!notif.is_read ? "font-semibold" : "font-medium"}`}>
                               {notif.message}
                             </p>
-                            <p className="text-xs text-slate-500 mt-1">
-                              {new Date(notif.created_at).toLocaleDateString()} at {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            <p className="text-xs nm-muted mt-1">
+                              {new Date(notif.created_at).toLocaleDateString()} at{" "}
+                              {new Date(notif.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </p>
                           </button>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="p-6">
-                       <EmptyState 
-                         icon={CheckCircle2} 
-                         title="All caught up!" 
-                         description="You have no new notifications right now."
-                       />
+                    <div className="py-4 px-4">
+                      <EmptyState
+                        icon={CheckCircle2}
+                        title="All caught up!"
+                        description="You have no new notifications right now."
+                      />
                     </div>
                   )}
                 </div>
@@ -145,62 +150,75 @@ export function Topbar({ onMenuClick }) {
             )}
           </div>
 
-          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-slate-200" aria-hidden="true" />
+          {/* Divider */}
+          <div className="hidden lg:block h-6 w-px" style={{ background: "#cdd5e0" }} aria-hidden="true" />
 
           {/* Profile Dropdown */}
           <div className="relative" ref={profileRef}>
-            <button 
+            <button
               type="button"
-              className="flex items-center gap-x-3 p-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-600 hover:bg-slate-50 transition-colors"
-              onClick={() => {
-                setProfileOpen(!profileOpen);
-                setNotifOpen(false);
-              }}
+              className="flex items-center gap-x-3 px-3 py-2 rounded-[10px] nm-btn transition-all"
+              onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
             >
-              <UserCircle className="h-8 w-8 text-slate-400" />
-              <span className="hidden lg:flex lg:items-center">
-                <span className="text-sm font-medium leading-6 text-slate-900" aria-hidden="true">
-                  {user?.name || "Student"}
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold"
+                style={{
+                  background: "linear-gradient(135deg, #6c63ff, #5a52d5)",
+                  color: "#ffffff",
+                  boxShadow: "2px 2px 6px #8a84d9"
+                }}
+              >
+                {user?.name?.[0]?.toUpperCase() || "U"}
+              </div>
+              <span className="hidden lg:flex lg:items-center gap-1">
+                <span className="text-sm font-semibold nm-heading" aria-hidden="true">
+                  {user?.name || "User"}
                 </span>
-                <ChevronDown className="ml-2 h-4 w-4 text-slate-400" aria-hidden="true" />
+                <ChevronDown className="h-4 w-4 nm-muted" aria-hidden="true" />
               </span>
             </button>
 
             {profileOpen && (
-              <div className="absolute right-0 z-50 mt-2.5 w-56 origin-top-right rounded-sm bg-white py-2 shadow-lg ring-1 ring-slate-900/5 focus:outline-none">
-                <div className="px-4 py-3 border-b border-slate-100 mb-1 bg-slate-50/50 flex flex-col gap-1">
+              <div className="absolute right-0 z-50 mt-3 w-56 nm-dropdown">
+                <div
+                  className="px-4 py-3 flex flex-col gap-1"
+                  style={{ borderBottom: "1px solid #cdd5e0" }}
+                >
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-900 truncate pr-2">{user?.name}</p>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider bg-slate-200 text-slate-700">
+                    <p className="text-sm font-bold nm-heading truncate pr-2">{user?.name}</p>
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-[6px] uppercase tracking-wider"
+                      style={{ background: "#6c63ff22", color: "#6c63ff" }}
+                    >
                       {user?.role}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                  <p className="text-xs nm-muted truncate">{user?.email}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                     setProfileOpen(false);
-                     navigate(`/${user?.role}/profile`);
-                  }}
-                  className="block px-4 py-2 text-sm leading-6 text-slate-700 hover:bg-slate-50 w-full text-left transition-colors font-medium"
-                >
-                  Your profile
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                     setProfileOpen(false);
-                     logout();
-                  }}
-                  className="block px-4 py-2 text-sm leading-6 text-red-600 hover:bg-slate-50 w-full text-left flex items-center transition-colors"
-                >
-                  <LogOut className="h-4 w-4 mr-2" /> Sign out
-                </button>
+
+                <div className="py-1">
+                  <button
+                    type="button"
+                    onClick={() => { setProfileOpen(false); navigate(`/${user?.role}/profile`); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm nm-text font-medium w-full text-left hover:bg-[#dde3ec] transition-colors"
+                  >
+                    <UserCircle className="h-4 w-4 nm-muted" style={{ color: "#7c8db5" }} />
+                    Your Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setProfileOpen(false); logout(); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium w-full text-left hover:bg-[#fdeae8] transition-colors"
+                    style={{ color: "#c0533a" }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </button>
+                </div>
               </div>
             )}
           </div>
-          
+
         </div>
       </div>
     </header>

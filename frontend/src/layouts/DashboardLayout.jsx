@@ -3,7 +3,6 @@ import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
-
 import { UnauthorizedPage } from "@/pages/UnauthorizedPage";
 
 export function DashboardLayout({ allowedRoles }) {
@@ -20,28 +19,34 @@ export function DashboardLayout({ allowedRoles }) {
   }
 
   return (
-    <div className="flex bg-slate-50 min-h-screen font-sans">
-      {/* Mobile sidebar placeholder */}
+    <div className="min-h-screen font-sans" style={{ background: "#e0e5ec" }}>
+      {/* Mobile sidebar overlay */}
       <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? "block" : "hidden"}`}>
-        <div 
-          className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" 
-          onClick={() => setSidebarOpen(false)} 
+        <div
+          className="fixed inset-0 backdrop-blur-sm transition-opacity"
+          style={{ background: "rgba(163,177,198,0.6)" }}
+          onClick={() => setSidebarOpen(false)}
         />
-        <div className="fixed inset-y-0 left-0 z-50 flex w-64 pt-5 pb-4 bg-white">
-           <Sidebar className="w-full h-full border-r-0" />
+        <div className="fixed inset-y-0 left-0 z-50 w-64" style={{ background: "#e0e5ec" }}>
+          <Sidebar className="w-full h-full" />
         </div>
       </div>
 
-      {/* Desktop sidebar */}
-      <Sidebar className="hidden lg:flex" />
+      {/* Desktop sidebar — fixed to viewport, never scrolls */}
+      <div className="hidden lg:block fixed inset-y-0 left-0 z-30 w-64">
+        <Sidebar className="w-full h-full" />
+      </div>
 
-      {/* Main Content Box */}
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+      {/* Main Content — offset by sidebar width on desktop */}
+      <div className="lg:pl-64 flex flex-col min-h-screen">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8 focus:outline-none">
-          <div 
-             key={location.pathname} 
-             className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out"
+        <main
+          className="flex-1 px-4 py-8 sm:px-6 lg:px-8 focus:outline-none"
+          style={{ background: "#e0e5ec" }}
+        >
+          <div
+            key={location.pathname}
+            className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out"
           >
             <Outlet />
           </div>

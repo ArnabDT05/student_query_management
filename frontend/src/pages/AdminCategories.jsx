@@ -140,8 +140,8 @@ export function AdminCategories() {
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Manage Categories</h1>
-          <p className="text-sm text-slate-500 mt-1">Configure the routing categories and department assignments.</p>
+          <h1 className="text-2xl font-bold nm-heading tracking-tight">Manage Categories</h1>
+          <p className="text-sm nm-muted mt-1">Configure the routing categories and department assignments.</p>
         </div>
         <Button onClick={() => openModal()} disabled={loading}>
           <Plus className="w-4 h-4 mr-2" />
@@ -150,11 +150,11 @@ export function AdminCategories() {
       </div>
 
       {error ? (
-        <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
+        <div className="nm-card p-2 overflow-hidden">
            <ErrorState title="System Configurations Offline" description={error} onRetry={() => window.location.reload()} />
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
+        <div className="nm-card overflow-hidden">
           <Table className="border-0">
           <TableHeader className="bg-slate-50 border-b border-slate-200">
             <TableRow>
@@ -184,7 +184,8 @@ export function AdminCategories() {
                     <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => openModal(category)}
-                        className="p-1.5 text-slate-400 hover:text-primary-600 rounded-sm hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-600"
+                        className="p-1.5 nm-btn rounded-[8px] transition-all"
+                        style={{ color: "#7c8db5" }}
                         title="Edit Category"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -194,7 +195,8 @@ export function AdminCategories() {
                           setCategoryToDelete(category);
                           setDeleteModalOpen(true);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-sm hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600"
+                        className="p-1.5 nm-btn rounded-[8px] transition-all"
+                        style={{ color: "#e17055" }}
                         title="Delete Category"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -244,7 +246,7 @@ export function AdminCategories() {
             disabled={isSubmitting}
             helperText="Tickets submitted to this category will automatically route to staff mapping this exact department string."
           />
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
+          <div className="flex justify-end gap-3 pt-4 mt-6" style={{ borderTop: "1px solid #cdd5e0" }}>
             <Button type="button" variant="ghost" onClick={closeModal} disabled={isSubmitting}>
               Cancel
             </Button>
@@ -261,11 +263,14 @@ export function AdminCategories() {
         title="Confirm Deletion"
       >
         <div className="flex flex-col items-center justify-center p-4 text-center">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-4">
+          <div
+            className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-4"
+            style={{ background: "#fdeae8", color: "#c0533a", boxShadow: "4px 4px 10px #d0b0ac, -4px -4px 10px #ffffff" }}
+          >
             <AlertTriangle className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete {categoryToDelete?.name}?</h3>
-          <p className="text-sm text-slate-500 mb-6">
+          <h3 className="text-lg font-bold nm-heading mb-2">Delete {categoryToDelete?.name}?</h3>
+          <p className="text-sm nm-muted mb-6">
             Are you sure you want to delete this category? Any open tickets assigned to this category will need to be re-routed manually. This action cannot be undone.
           </p>
           <div className="flex justify-end gap-3 w-full">

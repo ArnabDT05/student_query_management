@@ -19,26 +19,31 @@ export function Modal({ isOpen, onClose, title, children, className }) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
-        onClick={onClose} 
+      <div
+        className="fixed inset-0 backdrop-blur-sm transition-opacity"
+        style={{ background: "rgba(163,177,198,0.55)" }}
+        onClick={onClose}
       />
-      <div 
+      <div
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-sm bg-white shadow-xl flex flex-col max-h-[90vh]",
+          "relative z-50 w-full max-w-lg flex flex-col max-h-[90vh]",
+          "nm-card animate-in fade-in zoom-in-95 duration-200",
           className
         )}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: "1px solid #cdd5e0" }}
+        >
+          <h2 className="text-lg font-bold nm-heading">{title}</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none rounded-sm focus:ring-2 focus:ring-primary-600"
+            className="nm-btn h-8 w-8 flex items-center justify-center rounded-[8px] nm-muted hover:nm-text transition-all"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="px-6 py-4 overflow-y-auto">
+        <div className="px-6 py-5 overflow-y-auto">
           {children}
         </div>
       </div>

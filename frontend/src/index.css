@@ -1,33 +1,376 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-@theme {
-  --color-primary-500: #2563EB;
-  --color-primary-600: #1D4ED8;
-  --color-background-app: #F8FAFC;
-  --color-text-main: #1E293B;
+/* ============================================================
+   NEUMORPHISM DESIGN SYSTEM — SQRRS
+   Base: #e0e5ec | Shadow Dark: #a3b1c6 | Shadow Light: #ffffff
+   ============================================================ */
 
-  --color-status-open: #64748b;
-  --color-status-progress: #3b82f6;
-  --color-status-escalated: #ef4444;
-  --color-status-closed: #22c55e;
+@theme {
+  /* Core palette overrides */
+  --color-nm-base:        #e0e5ec;
+  --color-nm-dark:        #a3b1c6;
+  --color-nm-light:       #ffffff;
+  --color-nm-surface:     #e8ecf3;
+
+  /* Primary accent — soft indigo-violet */
+  --color-primary-400:    #8b83ff;
+  --color-primary-500:    #6c63ff;
+  --color-primary-600:    #5a52d5;
+  --color-primary-700:    #4843b8;
+
+  /* Semantic colors (kept soft for neumorphism) */
+  --color-status-open:       #7c8db5;
+  --color-status-progress:   #5a9cf8;
+  --color-status-escalated:  #e17055;
+  --color-status-closed:     #00b894;
+
+  /* Text scale */
+  --color-text-heading:   #2d3436;
+  --color-text-body:      #4a4a6a;
+  --color-text-muted:     #7c8db5;
+
+  /* Background */
+  --color-background-app: #e0e5ec;
 
   /* Fonts */
   --font-sans: "Inter", system-ui, sans-serif;
 
-  /* Overrides for crisp saas dashboard style */
-  --radius-sm: 0.125rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.25rem;
-  --radius-xl: 0.25rem;
-  --radius-2xl: 0.25rem;
+  /* Radii — softer for neumorphism */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-2xl:  24px;
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  /* Neumorphic shadows */
+  --shadow-nm-raised:   6px 6px 14px #a3b1c6, -6px -6px 14px #ffffff;
+  --shadow-nm-inset:    inset 4px 4px 10px #a3b1c6, inset -4px -4px 10px #ffffff;
+  --shadow-nm-flat:     3px 3px 7px #a3b1c6, -3px -3px 7px #ffffff;
+  --shadow-nm-pressed:  inset 2px 2px 6px #a3b1c6, inset -2px -2px 6px #ffffff;
 }
 
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
 @layer base {
-  body {
-    background-color: var(--color-background-app);
-    color: var(--color-text-main);
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background-color: #e0e5ec;
+    color: #4a4a6a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: #6c63ff33;
+    color: #2d3436;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #dde3ec;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #b0bcc9;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8fa0b5;
+  }
+}
+
+/* ============================================================
+   NEUMORPHIC UTILITY CLASSES
+   ============================================================ */
+@layer utilities {
+
+  /* --- Cards & Panels --- */
+  .nm-card {
+    background: #e0e5ec;
+    border-radius: 16px;
+    box-shadow: 6px 6px 14px #a3b1c6, -6px -6px 14px #ffffff;
+    border: none;
+  }
+
+  .nm-card-sm {
+    background: #e0e5ec;
+    border-radius: 12px;
+    box-shadow: 4px 4px 10px #a3b1c6, -4px -4px 10px #ffffff;
+    border: none;
+  }
+
+  .nm-card-flat {
+    background: #e8ecf3;
+    border-radius: 12px;
+    box-shadow: 3px 3px 7px #a3b1c6, -3px -3px 7px #ffffff;
+    border: none;
+  }
+
+  /* --- Inset / Pressed --- */
+  .nm-inset {
+    background: #d8dde8;
+    border-radius: 10px;
+    box-shadow: inset 4px 4px 10px #a3b1c6, inset -4px -4px 10px #ffffff;
+    border: none;
+  }
+
+  .nm-inset-sm {
+    background: #d8dde8;
+    border-radius: 8px;
+    box-shadow: inset 3px 3px 7px #a3b1c6, inset -3px -3px 7px #ffffff;
+    border: none;
+  }
+
+  /* --- Buttons --- */
+  .nm-btn {
+    background: #e0e5ec;
+    border-radius: 10px;
+    box-shadow: 4px 4px 9px #a3b1c6, -4px -4px 9px #ffffff;
+    border: none;
+    transition: all 0.18s ease;
+    cursor: pointer;
+  }
+  .nm-btn:hover {
+    box-shadow: 5px 5px 12px #a3b1c6, -5px -5px 12px #ffffff;
+  }
+  .nm-btn:active {
+    box-shadow: inset 3px 3px 7px #a3b1c6, inset -3px -3px 7px #ffffff;
+    transform: scale(0.98);
+  }
+
+  .nm-btn-primary {
+    background: linear-gradient(135deg, #6c63ff, #5a52d5);
+    border-radius: 10px;
+    box-shadow: 4px 4px 10px #8a84d9, -2px -2px 8px #ffffff55;
+    border: none;
+    color: #ffffff;
+    transition: all 0.18s ease;
+    cursor: pointer;
+  }
+  .nm-btn-primary:hover {
+    background: linear-gradient(135deg, #7b73ff, #6c63ff);
+    box-shadow: 5px 5px 14px #8a84d9, -3px -3px 10px #ffffff55;
+    transform: translateY(-1px);
+  }
+  .nm-btn-primary:active {
+    box-shadow: inset 3px 3px 7px #4843b8, inset -1px -1px 4px #ffffff44;
+    transform: scale(0.98) translateY(0);
+  }
+
+  .nm-btn-danger {
+    background: linear-gradient(135deg, #e17055, #d45d3e);
+    border-radius: 10px;
+    box-shadow: 4px 4px 10px #c07060, -2px -2px 8px #ffffff55;
+    border: none;
+    color: #ffffff;
+    transition: all 0.18s ease;
+    cursor: pointer;
+  }
+  .nm-btn-danger:hover {
+    box-shadow: 5px 5px 14px #b05a46, -3px -3px 10px #ffffff44;
+    transform: translateY(-1px);
+  }
+  .nm-btn-danger:active {
+    box-shadow: inset 3px 3px 7px #b05a46, inset -1px -1px 4px #ffffff33;
+    transform: scale(0.98);
+  }
+
+  /* --- Form Inputs --- */
+  .nm-input {
+    background: #d8dde8;
+    border-radius: 10px;
+    box-shadow: inset 4px 4px 10px #a3b1c6, inset -4px -4px 10px #ffffff;
+    border: none;
+    color: #2d3436;
+    transition: all 0.2s ease;
+    outline: none;
+    width: 100%;
+  }
+  .nm-input::placeholder {
+    color: #9aaac4;
+  }
+  .nm-input:focus {
+    box-shadow: inset 4px 4px 10px #a3b1c6, inset -4px -4px 10px #ffffff, 0 0 0 3px #6c63ff30;
+  }
+  .nm-input.error {
+    box-shadow: inset 4px 4px 10px #c0a0a0, inset -4px -4px 10px #ffffff, 0 0 0 3px #e1705520;
+  }
+
+  /* --- Sidebar --- */
+  .nm-sidebar {
+    background: #e0e5ec;
+    box-shadow: 6px 0 20px #a3b1c6;
+    border-right: none;
+  }
+
+  /* --- Topbar --- */
+  .nm-topbar {
+    background: #e0e5ec;
+    box-shadow: 0 4px 15px #a3b1c6, 0 -2px 8px #ffffff88;
+    border-bottom: none;
+  }
+
+  /* --- Nav Item Active --- */
+  .nm-nav-active {
+    background: linear-gradient(135deg, #e0e5ec, #d8dde8);
+    border-radius: 10px;
+    box-shadow: inset 3px 3px 7px #a3b1c6, inset -3px -3px 7px #ffffff;
+    color: #6c63ff;
+  }
+
+  .nm-nav-item {
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+  .nm-nav-item:hover {
+    background: #e8ecf3;
+    box-shadow: 2px 2px 6px #a3b1c6, -2px -2px 6px #ffffff;
+  }
+
+  /* --- Divider --- */
+  .nm-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #b0bfcf, transparent);
+  }
+
+  /* --- Badge variants --- */
+  .nm-badge {
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    box-shadow: 2px 2px 5px #a3b1c688, -2px -2px 5px #ffffff88;
+  }
+
+  .nm-badge-open {
+    background: #e0e5ec;
+    color: #7c8db5;
+  }
+  .nm-badge-progress {
+    background: #ddeaff;
+    color: #3b7dd8;
+    box-shadow: 2px 2px 5px #b0c0e0, -2px -2px 5px #ffffff;
+  }
+  .nm-badge-escalated {
+    background: #fdeae8;
+    color: #c0533a;
+    box-shadow: 2px 2px 5px #d0b0ac, -2px -2px 5px #ffffff;
+  }
+  .nm-badge-closed {
+    background: #d8f5ed;
+    color: #00856a;
+    box-shadow: 2px 2px 5px #a0c8c0, -2px -2px 5px #ffffff;
+  }
+
+  /* --- Logo chip --- */
+  .nm-logo {
+    background: linear-gradient(135deg, #6c63ff, #5a52d5);
+    border-radius: 10px;
+    box-shadow: 3px 3px 8px #8a84d9, -2px -2px 6px #ffffff55;
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  /* --- Stat card number --- */
+  .nm-stat-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6c63ff, #5a52d5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Dropdown --- */
+  .nm-dropdown {
+    background: #e0e5ec;
+    border-radius: 14px;
+    box-shadow: 8px 8px 20px #a3b1c6, -4px -4px 14px #ffffff;
+    border: none;
+    overflow: hidden;
+  }
+
+  /* --- Table --- */
+  .nm-table-header {
+    background: #d8dde8;
+    color: #7c8db5;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .nm-table-row {
+    background: #e0e5ec;
+    transition: all 0.15s ease;
+    border-bottom: 1px solid #cdd5e0;
+  }
+  .nm-table-row:hover {
+    background: #e8ecf3;
+  }
+  .nm-table-row-clickable:hover {
+    background: #e8ecf3;
+    cursor: pointer;
+  }
+
+  /* --- Text utilities --- */
+  .nm-heading {
+    color: #2d3436;
+    font-weight: 700;
+  }
+  .nm-subheading {
+    color: #4a4a6a;
+    font-weight: 600;
+  }
+  .nm-text {
+    color: #4a4a6a;
+  }
+  .nm-muted {
+    color: #7c8db5;
+  }
+  .nm-primary {
+    color: #6c63ff;
+  }
+
+  /* --- Animations --- */
+  .nm-fade-in {
+    animation: nmFadeIn 0.4s ease forwards;
+  }
+
+  @keyframes nmFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- Skeleton shimmer --- */
+  .nm-skeleton {
+    background: linear-gradient(90deg, #d8dde8 25%, #e4e9f0 50%, #d8dde8 75%);
+    background-size: 200% 100%;
+    animation: nmShimmer 1.5s infinite;
+    border-radius: 10px;
+  }
+  @keyframes nmShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* --- Priority / Status colors shared --- */
+  .nm-priority-low      { color: #5a9cf8; }
+  .nm-priority-medium   { color: #fdcb6e; }
+  .nm-priority-high     { color: #e17055; }
 }

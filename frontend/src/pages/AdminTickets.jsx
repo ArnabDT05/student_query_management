@@ -75,19 +75,19 @@ export function AdminTickets() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">All Tickets</h1>
-        <p className="text-sm text-slate-500 mt-1">Admin oversight over the entire system's active queue.</p>
+        <h1 className="text-2xl font-bold nm-heading tracking-tight">All Tickets</h1>
+        <p className="text-sm nm-muted mt-1">Admin oversight over the entire system's active queue.</p>
       </div>
 
       {error ? (
-        <div className="bg-white border border-slate-200 rounded-sm shadow-sm">
+        <div className="nm-card p-2">
           <ErrorState title="Queue Offline" description={error} onRetry={() => window.location.reload()} />
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-sm flex flex-col shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between bg-slate-50/50">
+        <div className="nm-card overflow-hidden">
+        <div className="p-4 flex flex-col sm:flex-row gap-4 justify-between" style={{ borderBottom: "1px solid #cdd5e0" }}>
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#9aaac4" }} />
             <Input 
               placeholder="Search by ID or Student..." 
               value={search}
@@ -97,7 +97,7 @@ export function AdminTickets() {
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {hasActiveFilters && (
-              <Button variant="ghost" className="h-9 px-3 text-slate-500 hover:text-slate-900" onClick={clearFilters}>
+              <Button variant="ghost" className="h-9 px-3" onClick={clearFilters}>
                 <FilterX className="w-4 h-4 mr-2" /> Clear
               </Button>
             )}

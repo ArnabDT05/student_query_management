@@ -1,11 +1,11 @@
 import { cn } from "@/utils/cn";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { 
-  LayoutDashboard, 
-  MessageSquarePlus, 
-  Ticket, 
-  Settings, 
+import {
+  LayoutDashboard,
+  MessageSquarePlus,
+  Ticket,
+  Settings,
   Users,
   BarChart3
 } from "lucide-react";
@@ -42,18 +42,28 @@ export function Sidebar({ className }) {
   const navItems = getNavItems();
 
   return (
-    <aside className={cn("flex w-64 flex-col border-r border-slate-200 bg-white h-screen", className)}>
-      <div className="flex h-16 shrink-0 items-center px-6 border-b border-slate-200">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary-600 text-white font-bold">
+    <aside
+      className={cn("flex w-64 flex-col h-screen", className)}
+      style={{ background: "#e0e5ec", boxShadow: "6px 0 20px #a3b1c6" }}
+    >
+      {/* Logo */}
+      <div className="flex h-16 shrink-0 items-center px-6" style={{ borderBottom: "1px solid #cdd5e0" }}>
+        <div className="flex items-center gap-3">
+          <div
+            className="nm-logo flex h-10 w-10 items-center justify-center text-sm"
+          >
             SQ
           </div>
-          <span className="text-sm font-semibold text-slate-900 tracking-tight">Query System</span>
+          <div>
+            <div className="text-sm font-bold nm-heading tracking-tight">SQRRS</div>
+            <div className="text-[10px] nm-muted font-medium tracking-wider uppercase">Query System</div>
+          </div>
         </div>
       </div>
-      
+
+      {/* Nav */}
       <div className="flex flex-1 flex-col overflow-y-auto px-4 py-6">
-        <nav className="flex flex-1 flex-col gap-1">
+        <nav className="flex flex-1 flex-col gap-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -61,17 +71,13 @@ export function Sidebar({ className }) {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  "group flex items-center gap-x-3 rounded-sm p-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary-50 text-primary-600"
-                    : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                  "group flex items-center gap-x-3 p-3 text-sm font-semibold transition-all duration-200",
+                  isActive ? "nm-nav-active nm-primary" : "nm-nav-item nm-text"
                 )}
               >
                 <item.icon
-                  className={cn(
-                    "h-5 w-5 shrink-0",
-                    isActive ? "text-primary-600" : "text-slate-400 group-hover:text-slate-600"
-                  )}
+                  className={cn("h-5 w-5 shrink-0 transition-colors", isActive ? "nm-primary" : "nm-muted")}
+                  style={{ color: isActive ? "#6c63ff" : undefined }}
                   aria-hidden="true"
                 />
                 {item.name}
@@ -80,13 +86,25 @@ export function Sidebar({ className }) {
           })}
         </nav>
       </div>
-      <div className="p-4 border-t border-slate-200 mt-auto">
-        <div className="text-xs text-slate-500 font-medium px-2 uppercase tracking-wider mb-2">Logged in as</div>
-        <div className="px-2 text-sm text-slate-900 truncate">
-          {user?.name || "Unknown User"}
-        </div>
-        <div className="px-2 text-xs text-slate-500 capitalize">
-          {user?.role} Role
+
+      {/* User footer */}
+      <div className="p-4" style={{ borderTop: "1px solid #cdd5e0" }}>
+        <div
+          className="rounded-[12px] px-4 py-3"
+          style={{ background: "#d8dde8", boxShadow: "inset 3px 3px 7px #a3b1c6, inset -3px -3px 7px #ffffff" }}
+        >
+          <div className="text-[10px] nm-muted font-bold uppercase tracking-widest mb-1">Logged in as</div>
+          <div className="text-sm font-bold nm-heading truncate">{user?.name || "Unknown User"}</div>
+          <div
+            className="text-[10px] font-bold px-2 py-0.5 rounded-[6px] capitalize mt-1 inline-block"
+            style={{
+              background: "#6c63ff22",
+              color: "#6c63ff",
+              letterSpacing: "0.06em"
+            }}
+          >
+            {user?.role}
+          </div>
         </div>
       </div>
     </aside>

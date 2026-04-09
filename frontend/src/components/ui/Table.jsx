@@ -2,8 +2,8 @@ import { cn } from "@/utils/cn";
 
 export function Table({ className, children }) {
   return (
-    <div className="w-full overflow-auto rounded-sm border border-slate-200 bg-white">
-      <table className={cn("w-full text-sm text-left text-slate-700", className)}>
+    <div className="w-full overflow-auto rounded-[14px]" style={{ boxShadow: "inset 3px 3px 8px #a3b1c6, inset -3px -3px 8px #ffffff" }}>
+      <table className={cn("w-full text-sm text-left", className)}>
         {children}
       </table>
     </div>
@@ -12,23 +12,27 @@ export function Table({ className, children }) {
 
 export function TableHeader({ className, children }) {
   return (
-    <thead className={cn("bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200", className)}>
+    <thead className={cn("nm-table-header", className)}>
       {children}
     </thead>
   );
 }
 
 export function TableBody({ className, children }) {
-  return <tbody className={cn("divide-y divide-slate-200", className)}>{children}</tbody>;
+  return (
+    <tbody className={cn("", className)}>
+      {children}
+    </tbody>
+  );
 }
 
 export function TableRow({ className, children, onClick }) {
   return (
-    <tr 
+    <tr
       onClick={onClick}
       className={cn(
-        "bg-white transition-all duration-200", 
-        !onClick ? "hover:bg-slate-50/50" : "hover:bg-slate-50 cursor-pointer active:bg-slate-100/80",
+        "nm-table-row",
+        onClick && "nm-table-row-clickable",
         className
       )}
     >
@@ -39,7 +43,7 @@ export function TableRow({ className, children, onClick }) {
 
 export function TableHead({ className, children }) {
   return (
-    <th className={cn("px-6 py-3 font-medium tracking-wider", className)}>
+    <th className={cn("px-6 py-3 font-bold tracking-wider", className)}>
       {children}
     </th>
   );
@@ -47,7 +51,7 @@ export function TableHead({ className, children }) {
 
 export function TableCell({ className, children }) {
   return (
-    <td className={cn("px-6 py-4 whitespace-nowrap", className)}>
+    <td className={cn("px-6 py-4 whitespace-nowrap nm-text", className)}>
       {children}
     </td>
   );

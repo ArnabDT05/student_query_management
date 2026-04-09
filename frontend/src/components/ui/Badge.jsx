@@ -1,20 +1,23 @@
 import { cn } from "@/utils/cn";
 
 const variantStyles = {
-  open: "bg-slate-100 text-slate-700 border border-slate-200",
-  "in progress": "bg-blue-50 text-blue-700 border border-blue-200",
-  escalated: "bg-red-50 text-red-700 border border-red-200",
-  closed: "bg-green-50 text-green-700 border border-green-200",
+  open: "nm-badge nm-badge-open",
+  "in progress": "nm-badge nm-badge-progress",
+  escalated: "nm-badge nm-badge-escalated",
+  closed: "nm-badge nm-badge-closed",
+  low: "nm-badge nm-badge-progress",
+  medium: "nm-badge",
+  high: "nm-badge nm-badge-escalated",
 };
 
 export function Badge({ children, variant = "open", className }) {
-  const normalizedVariant = variant.toLowerCase();
-  
+  const normalizedVariant = variant?.toLowerCase() ?? "open";
+
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide",
-        variantStyles[normalizedVariant] || variantStyles.open,
+        "inline-flex items-center",
+        variantStyles[normalizedVariant] ?? variantStyles.open,
         className
       )}
     >
