@@ -30,6 +30,7 @@ export function Sidebar({ className }) {
       case "admin":
         return [
           { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+          { name: "Users", href: "/admin/users", icon: Users },
           { name: "All Tickets", href: "/admin/tickets", icon: Ticket },
           { name: "Manage Categories", href: "/admin/categories", icon: Settings },
           { name: "Reports", href: "/admin/reports", icon: BarChart3 },

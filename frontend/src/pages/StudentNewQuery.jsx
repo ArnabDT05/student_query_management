@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { UploadCloud, X, FileText, AlertCircle } from "lucide-react";
+import { UploadCloud, X, FileText, AlertCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { detectCategory } from "@/services/categorizationService";
+import { sendNotification } from "@/services/notificationService";
 
 export function StudentNewQuery() {
   const navigate = useNavigate();
@@ -26,6 +28,27 @@ export function StudentNewQuery() {
     description: "",
   });
   const [file, setFile] = useState(null);
+  const [isAutoCategorized, setIsAutoCategorized] = useState(false);
+
+  // Auto-categorization listener
+  useEffect(() => {
+    if (!formData.subject && !formData.description) return;
+    if (formData.categoryId && !isAutoCategorized) return; // Don't override manual choice
+
+    const match = detectCategory(formData.subject, formData.description);
+    if (match) {
+      // Find the ID of the category that matches the suggested department/role
+      const suggested = categories.find(c => 
+        c.department?.toLowerCase().includes(match.replace('_', ' ')) ||
+        c.name?.toLowerCase().includes(match.replace('_', ' '))
+      );
+      
+      if (suggested && suggested.id !== formData.categoryId) {
+        setFormData(prev => ({ ...prev, categoryId: suggested.id }));
+        setIsAutoCategorized(true);
+      }
+    }
+  }, [formData.subject, formData.description, categories, isAutoCategorized]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -145,10 +168,10 @@ export function StudentNewQuery() {
       
       // Notify the assigned staff
       if (assignedTo) {
-        await supabase.from('notifications').insert({
-          user_id: assignedTo,
-          message: `New ticket assigned to your queue: Ticket ${ticket.id.split('-')[0].toUpperCase()} - ${title}`
-        });
+        await sendNotification(
+          assignedTo,
+          `New ticket assigned to your queue: Ticket ${ticket.id.split('-')[0].toUpperCase()} - ${title}`
+        );
       }
 
       const notificationPayload = {
@@ -160,15 +183,11 @@ export function StudentNewQuery() {
       
       console.log(`[TEST FLOW: STUDENT] Attempting to generate confirmation notification -> payload:`, notificationPayload);
       
-      const { error: notifError } = await supabase
-        .from('notifications')
-        .insert({
-           user_id: user.id,
-           message: notificationPayload.message,
-           is_read: false
-        });
+      await sendNotification(
+        user.id,
+        `Your query "${title}" has been successfully submitted to the queue.`
+      );
         
-      if (notifError) console.error("[TEST FLOW: STUDENT] Background notification silent failure:", notifError);
       
       console.log(`[TEST FLOW: STUDENT] Routing to Student Tickets table dashboard...`);
       toast.success(`Query submitted successfully! Your Ticket ID is ${ticket.id.split('-')[0].toUpperCase()}`);
@@ -202,14 +221,28 @@ export function StudentNewQuery() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <Select
-              id="category"
-              label="Category *"
-              required
-              disabled={fetchingCategories}
-              value={formData.categoryId}
-              onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-            >
+            <div className="relative">
+              <Select
+                id="category"
+                label={
+                  <span className="flex items-center gap-1.5">
+                    Category *
+                    {isAutoCategorized && (
+                      <span className="flex items-center gap-1 text-[10px] bg-primary-50 text-primary-600 px-1.5 py-0.5 rounded-full border border-primary-100 animate-pulse">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Auto-detected
+                      </span>
+                    )}
+                  </span>
+                }
+                required
+                disabled={fetchingCategories}
+                value={formData.categoryId}
+                onChange={(e) => {
+                  setFormData({ ...formData, categoryId: e.target.value });
+                  setIsAutoCategorized(false); // Reset once user manually interacts
+                }}
+              >
               <option value="" disabled>
                 {fetchingCategories ? "Loading categories..." : "Select Category..."}
               </option>
@@ -218,7 +251,8 @@ export function StudentNewQuery() {
                   {cat.name}
                 </option>
               ))}
-            </Select>
+              </Select>
+            </div>
 
             <Select
               id="priority"

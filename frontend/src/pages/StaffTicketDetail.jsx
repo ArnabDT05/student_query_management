@@ -12,6 +12,7 @@ import { ArrowLeft, Send, Clock, AlertTriangle, AlertOctagon } from "lucide-reac
 import { toast } from "sonner";
 import { cn } from "@/utils/cn";
 import { getSLAString } from "@/utils/sla";
+import { sendNotification } from "@/services/notificationService";
 
 export function StaffTicketDetail() {
   const { id: shortId } = useParams();
@@ -99,19 +100,19 @@ export function StaffTicketDetail() {
          toast.success(`Status updated to ${newStatus}`);
          
          if (ticket.student_id) {
-           await supabase.from('notifications').insert({
-             user_id: ticket.student_id,
-             message: `Your ticket ${ticket.id.split('-')[0].toUpperCase()} has been updated to ${newStatus}`
-           });
+           await sendNotification(
+             ticket.student_id,
+             `Your ticket ${ticket.id.split('-')[0].toUpperCase()} has been updated to ${newStatus}`
+           );
          }
          
          if (newStatus === 'escalated') {
            const { data: admins } = await supabase.from('users').select('id').eq('role', 'admin').limit(1);
            if (admins && admins.length > 0) {
-             await supabase.from('notifications').insert({
-               user_id: admins[0].id,
-               message: `Ticket ${ticket.id.split('-')[0].toUpperCase()} has been urgently Escalated!`
-             });
+             await sendNotification(
+               admins[0].id,
+               `Ticket ${ticket.id.split('-')[0].toUpperCase()} has been urgently Escalated!`
+             );
            }
          }
       }
@@ -132,10 +133,10 @@ export function StaffTicketDetail() {
        toast.success(`Ticket marked as ${pendingStatus}`);
        
        if (ticket.student_id) {
-           await supabase.from('notifications').insert({
-             user_id: ticket.student_id,
-             message: `Your ticket ${ticket.id.split('-')[0].toUpperCase()} has been marked as ${pendingStatus}`
-           });
+           await sendNotification(
+             ticket.student_id,
+             `Your ticket ${ticket.id.split('-')[0].toUpperCase()} has been marked as ${pendingStatus}`
+           );
        }
     }
   };
@@ -167,10 +168,10 @@ export function StaffTicketDetail() {
       
       // Notify the student about the staff reply
       if (ticket.student_id) {
-         await supabase.from('notifications').insert({
-            user_id: ticket.student_id,
-            message: `Staff replied to your ticket ${ticket.id.split('-')[0].toUpperCase()}`
-         });
+         await sendNotification(
+           ticket.student_id,
+           `Staff replied to your ticket ${ticket.id.split('-')[0].toUpperCase()}`
+         );
       }
       
       // Optionally update status to In Progress
@@ -182,10 +183,10 @@ export function StaffTicketDetail() {
            toast.info("Status automatically updated to In Progress");
            
            // Notify student of status change
-           await supabase.from('notifications').insert({
-             user_id: ticket.student_id,
-             message: `Your ticket ${ticket.id.split('-')[0].toUpperCase()} has been marked as In Progress`
-           });
+           await sendNotification(
+             ticket.student_id,
+             `Your ticket ${ticket.id.split('-')[0].toUpperCase()} has been marked as In Progress`
+           );
         }
       }
     } catch (err) {

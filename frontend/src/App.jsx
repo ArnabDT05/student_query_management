@@ -13,6 +13,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminTickets } from "./pages/AdminTickets";
 import { AdminCategories } from "./pages/AdminCategories";
 import { AdminReports } from "./pages/AdminReports";
+import { AdminUsers } from "./pages/AdminUsers";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Toaster } from "sonner";
@@ -45,6 +46,7 @@ function App() {
 
           <Route element={<DashboardLayout allowedRoles={["admin"]} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/tickets" element={<AdminTickets />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/reports" element={<AdminReports />} />
