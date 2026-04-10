@@ -27,25 +27,26 @@ export function AuthProvider({ children }) {
     });
   };
 
+  // Helper to prevent database queries from hanging the entire app
+  const withTimeout = (promise, ms = 3000) => {
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Database Query Timeout")), ms)
+    );
+    return Promise.race([promise, timeout]);
+  };
+
   const mapSupabaseUser = async (supabaseUser) => {
     if (!supabaseUser) return null;
+    console.log("🔍 [AUTH] Mapping user profile for:", supabaseUser.id);
+    
     try {
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single();
+      // Race the DB query against a 3s timeout
+      const { data: profile, error } = await withTimeout(
+        supabase.from('users').select('*').eq('id', supabaseUser.id).single()
+      );
 
-      if (error) {
-        console.warn("Using metadata fallback for user:", supabaseUser.id);
-        const fetched = {
-          id: supabaseUser.id,
-          email: supabaseUser.email,
-          name: supabaseUser.user_metadata?.name || supabaseUser.email.split("@")[0],
-          role: supabaseUser.user_metadata?.role || "student"
-        };
-        updateIfChanged(fetched);
-        return fetched;
+      if (error || !profile) {
+        throw new Error(error?.message || "Profile not found in users table");
       }
 
       const fetched = {
@@ -55,11 +56,22 @@ export function AuthProvider({ children }) {
         role: profile.role,
         department: profile.department
       };
+      
+      console.log("✅ [AUTH] Profile mapped from database.");
       updateIfChanged(fetched);
       return fetched;
     } catch (e) {
-      console.error("Map profile failure:", e);
-      return null;
+      console.warn(`⚠️ [AUTH] Falling back to metadata: ${e.message}`);
+      // Fallback to metadata if DB is slow or account is new
+      const fetched = {
+        id: supabaseUser.id,
+        email: supabaseUser.email,
+        name: supabaseUser.user_metadata?.name || supabaseUser.email?.split("@")[0] || "User",
+        role: supabaseUser.user_metadata?.role || "student",
+        department: supabaseUser.user_metadata?.department
+      };
+      updateIfChanged(fetched);
+      return fetched;
     }
   };
 
