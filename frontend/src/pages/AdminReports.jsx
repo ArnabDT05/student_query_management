@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 export function AdminReports() {
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ export function AdminReports() {
       try {
         const { data, error } = await supabase
           .from("tickets")
-          .select("id, status, priority, created_at, updated_at, subject, categories(name)")
+          .select("id, status, priority, created_at, updated_at, title, categories(name)")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -91,14 +91,14 @@ export function AdminReports() {
       // Table Data
       const tableData = tickets.map(t => [
         t.id.slice(0, 8),
-        t.subject?.slice(0, 30) + (t.subject?.length > 30 ? '...' : ''),
+        t.title?.slice(0, 30) + (t.title?.length > 30 ? '...' : ''),
         t.status,
         t.priority,
         t.categories?.name || "None",
         new Date(t.created_at).toLocaleDateString()
       ]);
       
-      doc.autoTable({
+      autoTable(doc, {
         startY: 75,
         head: [['ID', 'Subject', 'Status', 'Priority', 'Category', 'Created At']],
         body: tableData,
@@ -172,7 +172,7 @@ export function AdminReports() {
             <tbody>
               {tickets.slice(0, 10).map((t) => (
                 <tr key={t.id} className="border-b border-slate-200 hover:bg-slate-50">
-                  <td className="px-6 py-4 font-medium text-slate-900 max-w-[250px] truncate">{t.subject}</td>
+                  <td className="px-6 py-4 font-medium text-slate-900 max-w-[250px] truncate">{t.title}</td>
                   <td className="px-6 py-4">{t.categories?.name || "-"}</td>
                   <td className="px-6 py-4">
                     <span className="capitalize">{t.status.replace("_", " ")}</span>
