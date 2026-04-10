@@ -41,9 +41,11 @@ export function LoginPage() {
     if (!isFormValid) return;
 
     setLoading(true);
+    console.log("🚀 [LOGIN] Auth process started...");
     try {
       if (isSignUp) {
         const payloadDepartment = role === "staff" ? department : null;
+        console.log("📝 [LOGIN] Attempting sign up...");
         const data = await signUp(email, password, role, name, payloadDepartment);
         if (data?.user?.identities?.length === 0) {
           setAuthError("An account with this email already exists.");
@@ -53,15 +55,19 @@ export function LoginPage() {
           setPassword("");
         }
       } else {
+        console.log("🔑 [LOGIN] Attempting sign in...");
         const { user: loggedInUser } = await login(email, password);
+        console.log("✅ [LOGIN] Auth successful, mapping and redirecting...");
         toast.success("Signed in successfully!");
         if (loggedInUser.role === "admin") navigate("/admin/dashboard");
         else if (loggedInUser.role === "staff") navigate("/staff/dashboard");
         else navigate("/student/dashboard");
       }
     } catch (error) {
+      console.error("❌ [LOGIN] Auth operation failed:", error);
       setAuthError(error.message || "An error occurred during authentication.");
     } finally {
+      console.log("🏁 [LOGIN] Process finished, resetting loader.");
       setLoading(false);
     }
   };

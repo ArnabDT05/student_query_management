@@ -76,18 +76,24 @@ export function AuthProvider({ children }) {
     }, 10000);
 
     const initializeAuth = async () => {
+      console.log("🕵️ [AUTH] Initializing session...");
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
         
         if (session?.user) {
+          console.log("👤 [AUTH] Detected active session for:", session.user.email);
           await mapSupabaseUser(session.user);
-          await checkAndEscalateTickets();
+          // Run background tasks without blocking the UI
+          checkAndEscalateTickets().catch(err => console.error("Background SLA Error:", err));
+        } else {
+          console.log("🚪 [AUTH] No active session found.");
         }
       } catch (err) {
-        console.error("Critical Auth Init Failure:", err);
+        console.error("❌ Critical Auth Init Failure:", err);
       } finally {
         setLoading(false);
+        console.log("🏁 [AUTH] Initialization complete.");
         clearTimeout(timeout);
       }
     };

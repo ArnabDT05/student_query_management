@@ -3,8 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase keys are missing! Please check your .env file.");
+const isPlaceholder = !supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("placeholder");
+
+if (isPlaceholder) {
+  console.warn("⚠️ [SUPABASE] Running with placeholder keys. Database features will be non-functional.");
 }
 
 export const supabase = createClient(
