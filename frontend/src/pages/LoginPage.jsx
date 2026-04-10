@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
@@ -16,10 +16,20 @@ export function LoginPage() {
   const [department, setDepartment] = useState("");
   const navigate = useNavigate();
 
+  const { login, signUp, isAuthenticated, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [redirecting, setRedirecting] = useState(false);
 
-  const { login, signUp } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated && user && !redirecting) {
+      setRedirecting(true);
+      const role = user.role;
+      if (role === "admin") navigate("/admin/dashboard");
+      else if (role === "staff") navigate("/staff/dashboard");
+      else navigate("/student/dashboard");
+    }
+  }, [isAuthenticated, user, navigate, redirecting]);
 
   const isFormValid = isSignUp
     ? email.trim() !== "" && password.trim() !== "" && name.trim() !== "" && (role !== "staff" || department.trim() !== "")

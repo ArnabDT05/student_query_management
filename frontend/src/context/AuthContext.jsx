@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/services/supabaseClient";
 import { toast } from "sonner";
@@ -11,151 +11,151 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const initRef = useRef(false);
 
-  const mapSupabaseUser = async (supabaseUser) => {
-    // Fetch the detailed user row from public.users mapping standard credentials
-    const { data: profile, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', supabaseUser.id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching user profile:", error);
-      // Fallback to metadata if the trigger hasn't completed yet
-      const role = supabaseUser.user_metadata?.role || "student";
-      const name = supabaseUser.user_metadata?.name || supabaseUser.email.split("@")[0];
-      setUser({ id: supabaseUser.id, email: supabaseUser.email, name, role });
-      return;
-    }
-
-    setUser({
-      id: profile.id,
-      email: supabaseUser.email,
-      name: profile.name,
-      role: profile.role,
-      department: profile.department
+  // Compare user objects to avoid unnecessary state updates
+  const updateIfChanged = (newUser) => {
+    setUser(prev => {
+      if (!newUser && !prev) return null;
+      if (newUser && prev && 
+          newUser.id === prev.id && 
+          newUser.role === prev.role && 
+          newUser.email === prev.email) {
+        return prev; // No change
+      }
+      return newUser;
     });
   };
 
-  useEffect(() => {
-    // Check active session on mount
-    const initializeAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
+  const mapSupabaseUser = async (supabaseUser) => {
+    if (!supabaseUser) return null;
+    try {
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
       if (error) {
-        console.error("Auth session error:", error);
+        console.warn("Using metadata fallback for user:", supabaseUser.id);
+        const fetched = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata?.name || supabaseUser.email.split("@")[0],
+          role: supabaseUser.user_metadata?.role || "student"
+        };
+        updateIfChanged(fetched);
+        return fetched;
       }
-      
-      if (session?.user) {
-        await mapSupabaseUser(session.user);
-        checkAndEscalateTickets();
+
+      const fetched = {
+        id: profile.id,
+        email: supabaseUser.email,
+        name: profile.name,
+        role: profile.role,
+        department: profile.department
+      };
+      updateIfChanged(fetched);
+      return fetched;
+    } catch (e) {
+      console.error("Map profile failure:", e);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+
+    // Safety timeout: If auth takes > 10s, stop loading to prevent white screen
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn("Auth initialization timed out.");
+        setLoading(false);
       }
-      setLoading(false);
+    }, 10000);
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session?.user) {
+          await mapSupabaseUser(session.user);
+          await checkAndEscalateTickets();
+        }
+      } catch (err) {
+        console.error("Critical Auth Init Failure:", err);
+      } finally {
+        setLoading(false);
+        clearTimeout(timeout);
+      }
     };
 
     initializeAuth();
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log(`[AUTH EVENT] ${event}`);
         if (session?.user) {
           await mapSupabaseUser(session.user);
-          if (_event === 'SIGNED_IN') {
+          if (event === 'SIGNED_IN') {
              checkAndEscalateTickets();
           }
         } else {
-          setUser(null);
+          updateIfChanged(null);
         }
-        setLoading(false);
       }
     );
 
     return () => {
       subscription.unsubscribe();
+      clearTimeout(timeout);
     };
   }, []);
 
-  // --- TEST FLOW 1 & 2 & 3: Login ---
   const login = async (email, password) => {
-    console.log(`[TEST FLOW: AUTH] Attempting login for email: ${email}`);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      console.error(`[TEST FLOW: AUTH] Login purely rejected by Supabase:`, error);
-      throw error;
-    }
-
-    // Role check and sync
-    console.log(`[TEST FLOW: AUTH] Login Success. UUID: ${data.user.id}. Fetching role...`);
-    const { data: roleData, error: roleError } = await supabase
-      .from("users")
-      .select("role, name")
-      .eq("id", data.user.id)
-      .single();
-
-    if (roleError || !roleData) {
-      console.warn(`[TEST FLOW: AUTH] Warning: Native role mapping not found! Falling back to raw user_metadata.`);
-      const fetchedUser = {
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.user_metadata?.name || "Unknown User",
-        role: data.user.user_metadata?.role || "student", 
-      };
-      setUser(fetchedUser);
-      console.log(`[TEST FLOW: AUTH] Final Session Loaded (Metadata Fallback):`, fetchedUser);
-      return { user: fetchedUser };
-    }
-
-    const fetchedUser = {
-      id: data.user.id,
-      email: data.user.email,
-      name: roleData.name,
-      role: roleData.role,
-    };
-    
-    console.log(`[TEST FLOW: AUTH] Final Session Loaded (DB Verified):`, fetchedUser);
-    setUser(fetchedUser);
-    return { user: fetchedUser };
+    if (error) throw error;
+    const u = await mapSupabaseUser(data.user);
+    return { user: u };
   };
 
   const signUp = async (email, password, role, name, department) => {
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          role,
-          name,
-          department
-        }
-      }
+      email, password,
+      options: { data: { role, name, department } }
     });
-
     if (error) throw error;
     return data;
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-      return;
-    }
-    setUser(null);
+    await supabase.auth.signOut();
+    updateIfChanged(null);
     navigate("/login");
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#e0e5ec]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
+          <p className="text-sm font-semibold text-slate-500">Initializing Session...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthContext.Provider value={{ user, login, signUp, logout, isAuthenticated: !!user, loading }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (context === undefined) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }
